@@ -1,0 +1,108 @@
+class WasteRequest:
+    """Represents a single request for waste collection."""
+
+    # Class-level counter for unique request IDs
+    next_id = 1
+
+    def __init__(self, waste_type: str, weight_kg: float, location: str):
+        """
+        Initializes a new waste request.
+
+        Args:
+            waste_type: The type of waste (e.g., 'Recyclable', 'Hazardous', 'General').
+            weight_kg: The estimated weight in kilograms.
+            location: The pickup location/address.
+        """
+        self.request_id = WasteRequest.next_id
+        WasteRequest.next_id += 1
+        self.waste_type = waste_type
+        self.weight_kg = weight_kg
+        self.location = location
+        self.status = "Pending"  # Status can be 'Pending', 'Scheduled', 'Completed'
+
+    def __str__(self):
+        return f"ID: {self.request_id} | Type: {self.waste_type} | Weight: {self.weight_kg}kg | Location: {self.location} | Status: {self.status}"
+
+class WasteManager:
+    """Manages all waste disposal requests and provides statistics."""
+
+    def __init__(self):
+        self.requests = []
+
+    def add_request(self, request: WasteRequest):
+        """Adds a new waste request to the system."""
+        self.requests.append(request)
+        print(f"\n Request {request.request_id} ({request.waste_type}) registered successfully.")
+
+    def update_status(self, request_id: int, new_status: str):
+        """Updates the status of a specific waste request."""
+        for request in self.requests:
+            if request.request_id == request_id:
+                request.status = new_status
+                print(f"\n Request {request_id} status updated to '{new_status}'.")
+                return
+        print(f"\n Error: Request ID {request_id} not found.")
+
+    def view_all_requests(self):
+        """Prints a list of all current requests."""
+        if not self.requests:
+            print("\n No waste requests currently in the system.")
+            return
+
+        print("\n--- Current Waste Requests ---")
+        for request in self.requests:
+            print(request)
+        print("------------------------------")
+
+    def get_statistics(self):
+        """Calculates  and prints statistics on waste types and weights."""
+        total_weight = 0
+        weight_by_type = {}
+        status_count = {"Pending": 0, "Scheduled": 0, "Completed": 0}
+
+        for request in self.requests:
+            total_weight += request.weight_kg
+            # Tally weight by type
+            weight_by_type[request.waste_type] = weight_by_type.get(request.waste_type, 0) + request.weight_kg
+            # Tally status count
+            status_count[request.status] = status_count.get(request.status, 0) + 1
+
+        print("\n--- Waste Management Statistics ---")
+        print(f"Total Requests: {len(self.requests)}")
+        print(f"Total Weight: {total_weight:.2f} kg")
+        print("\nWeight by Type:")
+        for type, weight in weight_by_type.items():
+            print(f"- {type}: {weight:.2f} kg")
+        print("\nRequests by Status:")
+        for status, count in status_count.items():
+            print(f"- {status}: {count} requests")
+        print("-----------------------------------")
+
+
+# --- Demonstration of Usage ---
+
+if __name__ == "__main__":
+    manager = WasteManager()
+
+    # 1. Register new requests
+    req1 = WasteRequest("Recyclable", 15.5, "123 Main St")
+    req2 = WasteRequest("General", 22.0, "456 Oak Ave")
+    req3 = WasteRequest("Hazardous", 1.2, "789 Pine Ln")
+
+    manager.add_request(req1)
+    manager.add_request(req2)
+    manager.add_request(req3)
+
+    # 2. View all requests
+    manager.view_all_requests()
+
+    # 3. Update status of a request (simulating scheduling and completion)
+    manager.update_status(1, "Scheduled")
+    manager.update_status(2, "Completed")
+    manager.update_status(4, "Failed") # Test a non-existent ID
+
+    # 4. View updated requests
+    manager.view_all_requests()
+
+    # 5. Check statistics
+    manager.get_statistics()
